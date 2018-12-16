@@ -11,6 +11,20 @@ defmodule FuzzyRobot.Component.Robot do
             front_of: :south,
             current_position: nil
 
+  def build!(board, position) do
+    case build(board, position) do
+      {:ok, robot} -> robot
+      {:error, message} -> raise message
+    end
+  end
+
+  def build(%Component.Board{} = board, position) when is_position(position) do
+    {:ok, %Component.Robot{board: board, current_position: position}}
+  end
+
+  def build(_, position) when is_position(position), do: {:error, "Not possible build a robot: expect a valid board"}
+  def build(_, _), do: {:error, "Not possible build a robot: expect a valid position"}
+
   def go(%Component.Robot{} = robot) do
     with {:ok, robot} <- read_sensors(robot),
          {:ok, robot} <- decide(robot)
@@ -20,6 +34,23 @@ defmodule FuzzyRobot.Component.Robot do
   end
 
   def decide(%Component.Robot{} = robot) do
+    distance_by_compass = robot |> value_sensors_by_compass()
+    {direction, distance} =
+      distance_by_compass
+      |> Enum.max_by(fn {_, dir} -> dir end)
+    {:ok, robot} = robot |> decide_if_turn(direction)
+    robot |> move(div(distance, 2))
+  end
+
+  defp decide_if_turn(robot, direction) do
+    if robot.front_of != direction do
+      turn(robot, direction)
+    else
+      {:ok, robot}
+    end
+  end
+
+  defp value_sensors_by_compass(robot) do
     robot.compass
     |> get_readble_directions()
     |> Enum.map(fn x ->
@@ -27,7 +58,6 @@ defmodule FuzzyRobot.Component.Robot do
         robot |> Map.fetch!(robot.compass |> Map.fetch!(x))
       {x, value}
     end)
-
   end
 
   def calibrate_compass(%Component.Robot{} = robot) do
@@ -58,7 +88,6 @@ defmodule FuzzyRobot.Component.Robot do
     robot.compass
     |> get_readble_directions()
     |> Enum.map(fn x ->
-      x |> IO.inspect(label: "Checking positon: ")
       line = {position, Helpers.wk_dir(x, position, distance)}
       %{robot.compass[x] =>
         robot.board
@@ -98,7 +127,7 @@ defmodule FuzzyRobot.Component.Robot do
 
   def move(%Component.Robot{} = robot, steps) when is_integer(steps) do
     {:ok, robot} = read_sensors(robot)
-    if validate_sensor(robot, robot.front_of, steps) |> IO.inspect do
+    if validate_sensor(robot, robot.front_of, steps) do
       next_pos = Helpers.wk_dir(robot.front_of, robot.current_position, steps)
       go_to(robot, next_pos)
     else

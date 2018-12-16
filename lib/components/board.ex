@@ -3,6 +3,17 @@ defmodule FuzzyRobot.Component.Board do
 
   alias FuzzyRobot.Component
 
+  def build!(width, height) do
+    case build(width, height) do
+      {:ok, board} -> board
+      {:error, message} -> raise message
+    end
+  end
+
+  def build(width, height) do
+    {:ok, %Component.Board{width: width, height: height}}
+  end
+
   @doc """
     tuple_line it's a tuple of tuples that contains two internal tuples,
     the first is the initial position to be checked,

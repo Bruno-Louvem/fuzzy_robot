@@ -5,7 +5,7 @@ use Mix.Config
 # Configure the main viewport for the Scenic application
 config :fuzzy_robot, :viewport, %{
   name: :main_viewport,
-  size: {700, 600},
+  size: {880, 960},
   default_scene: {FuzzyRobot.Scene.Game, nil},
   drivers: [
     %{

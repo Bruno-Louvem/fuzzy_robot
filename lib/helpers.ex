@@ -19,6 +19,11 @@ defmodule Helpers do
   def get_len(:south, {{_, y1}, {_, y2}}), do: y2 - y1
   def get_len(:north,    {{_, y1}, {_, y2}}), do: y1 - y2
 
+  def dir_to_compass("up"), do: :north
+  def dir_to_compass("down"), do: :south
+  def dir_to_compass("right"), do: :east
+  def dir_to_compass("left"), do: :west
+
   def get_all_pos_line(dir, len, start_pos) do
     0..len
     |> Enum.map_reduce(start_pos,
