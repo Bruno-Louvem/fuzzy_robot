@@ -7,7 +7,7 @@ defmodule FuzzyRobot do
     import Supervisor.Spec, warn: false
 
     # load the viewport configuration from config
-    main_viewport_config = Application.get_env(:fuzzy_robot, :viewport)
+    # main_viewport_config = Application.get_env(:fuzzy_robot, :viewport)
 
     # start the application with the viewport
     children = [
